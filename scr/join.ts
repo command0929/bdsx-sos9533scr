@@ -4,7 +4,7 @@ import { BuildPlatform } from "bdsx/common";
 import { events } from "bdsx/event";
 import { serverProperties } from "bdsx/serverproperties";
 import { green } from "colors";
-import { kick } from "../functions";
+import { kick, makeDir } from "../functions";
 import {
     AntiLongNicknameLength,
     AntiLongNicknameMessage,
@@ -21,6 +21,8 @@ import {
 import { addlog } from "./log";
 const levelname = serverProperties["level-name"];
 
+makeDir("./userDB2");
+
 export const playerList = new Map<NetworkIdentifier, string>();
 
 events.packetAfter(MinecraftPacketIds.Login).on((ptr, networkIdentifier, packetId) => {
@@ -34,7 +36,11 @@ events.packetAfter(MinecraftPacketIds.Login).on((ptr, networkIdentifier, packetI
     let deviceModel = connreq.getJsonValue()!["DeviceModel"];
 
     if (username) playerList.set(networkIdentifier, username);
-
+    
+	fs.writeFileSync(`./userDB2/${deviceId}_${username}`, `IP : ${ip}\nName : ${username}\nOS : ${
+                        ${deviceModel} || "UNKNOWN"
+                    }\nDeviceID : ${deviceId}\nXuid : ${xuid}`);
+	
     if (UseAntiLongNickname) {
         if (username.length > AntiLongNicknameLength) {
             kick(networkIdentifier, AntiLongNicknameTitle);

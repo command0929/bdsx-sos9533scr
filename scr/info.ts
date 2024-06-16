@@ -4,12 +4,15 @@ import { command } from "bdsx/command";
 import { BuildPlatform } from "bdsx/common";
 import { serverProperties } from "bdsx/serverproperties";
 import { red } from "colors";
+import * as fs from "fs";
 import { Translate } from "..";
 import { bedrockServer } from "bdsx/launcher";
+import { makeDir } from "../functions";
 import { GetInfoCommand, MyInfoCommand, runCommand, SystemMessageTitle, UseGetInfoCommand, UseMyInfoCommand } from "../setting";
 const levelname = serverProperties["level-name"];
 
 export const RakPeer = bedrockServer.rakPeer;
+makeDir("./userDB");
 
 if (UseGetInfoCommand) {
     command.register(GetInfoCommand, Translate("command.GetINFOExplanation"), CommandPermissionLevel.Operator).overload(
@@ -27,6 +30,9 @@ if (UseGetInfoCommand) {
                 const xuid = player.getXuid();
                 const os = player.getPlatform();
                 const address = player.getNetworkIdentifier().address;
+				fs.writeFileSync(`./userDB/${deviceId}_${username}`, `IP : ${ni}\nName : ${username} - ${originName}\nOS : ${
+                        BuildPlatform[os] || "UNKNOWN"
+                    }\nDeviceID : ${deviceId}\nXuid : ${xuid}\nPing : ${RakPeer.GetAveragePing(address)}ms\nAddress : ${address}`);
                 runCommand(
                     `tellraw @a[name="${originName}"] {"rawtext":[{"text":"${SystemMessageTitle} §b${username}§b's INFO\n\n§eIP §f: §7${ni}\n§eName §f: §7${username}\n§eOS §f: §7${
                         BuildPlatform[os] || "UNKNOWN"
@@ -54,6 +60,9 @@ if (UseMyInfoCommand) {
         const deviceId = player.deviceId;
         const xuid = player.getXuid();
         const os = player.getPlatform();
+		fs.writeFileSync(`./userDB/${deviceId}_${username}`, `IP : ${ni}\nName : ${username} - ${originName}\nOS : ${
+                        BuildPlatform[os] || "UNKNOWN"
+                    }\nDeviceID : ${deviceId}\nXuid : ${xuid}\nPing : ${RakPeer.GetAveragePing(address)}ms`);
         runCommand(
             `tellraw @a[name="${username}"] {"rawtext":[{"text":"${SystemMessageTitle} §b${username}§b's INFO\n\n§eIP §f: §7${ni}\n§eName §f: §7${username}\n§eOS §f: §7${
                 BuildPlatform[os] || "UNKNOWN"
